@@ -1,10 +1,20 @@
 from fastapi import FastAPI
 
 app = FastAPI(
-    title="Project ClinGraph API",
-    version="1.0.0"
+    title="ClinGraph API",
+    version="0.1.0"
 )
 
+
 @app.get("/")
-async def root():
-    return {"message": "Project ClinGraph Backend Running"}
+def root():
+    return {
+        "message": "Welcome to ClinGraph API"
+    }
+
+
+@app.get("/health")
+def health():
+    return {
+        "status": "ok"
+    }
