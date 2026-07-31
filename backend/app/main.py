@@ -1,10 +1,13 @@
 from fastapi import FastAPI
-from app.routers.health import router
+
+from app.core.config import settings
+from app.routers.health import router as health_router
+from app.routers.database import router as database_router
 
 app = FastAPI(
-    title="ClinGraph API",
-    description="Backend API for ClinGraph",
-    version="0.1.0",
+    title=settings.APP_NAME,
+    version=settings.APP_VERSION,
 )
 
-app.include_router(router)
+app.include_router(health_router)
+app.include_router(database_router)
