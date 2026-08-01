@@ -21,3 +21,19 @@ def get_labels():
     result = neo4j_connection.execute_query(query)
 
     return result
+
+@router.get("/nodes/{label}")
+def get_nodes_by_label(label: str, limit: int = 25):
+
+    query = f"""
+    MATCH (n:`{label}`)
+    RETURN n
+    LIMIT $limit
+    """
+
+    result = neo4j_connection.execute_query(
+        query,
+        {"limit": limit}
+    )
+
+    return result
