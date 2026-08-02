@@ -6,6 +6,7 @@ from app.routers.database import router as database_router
 from app.routers.graph import router as graph_router
 from app.routers.llm import router as llm_router
 from app.routers.chat import router as chat_router
+from app.routers.openai import router as openai_router
 
 app = FastAPI(
     title=settings.APP_NAME,
@@ -17,3 +18,4 @@ app.include_router(database_router)
 app.include_router(graph_router)
 app.include_router(llm_router)
 app.include_router(chat_router)
+app.include_router(openai_router)
