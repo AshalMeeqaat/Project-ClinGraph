@@ -2,7 +2,7 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 from typing import List
 
-from app.services.ollama_service import ollama_service
+from app.services.langchain_service import langchain_service
 from app.services.graph_service import graph_service
 from app.services.prompt_builder import build_prompt
 
@@ -25,6 +25,7 @@ class ChatCompletionRequest(BaseModel):
 @router.post("/chat/completions")
 def chat_completions(request: ChatCompletionRequest):
 
+    # Get the latest user message
     user_message = ""
 
     for message in reversed(request.messages):
@@ -34,8 +35,13 @@ def chat_completions(request: ChatCompletionRequest):
 
     disease = None
 
-    if "alzheimer" in user_message.lower():
+    message_lower = user_message.lower()
+
+    # Temporary hardcoded detection
+    if "alzheimer" in message_lower:
         disease = "Alzheimer's disease"
+
+    # Later we'll replace this with automatic detection
 
     if disease:
 
@@ -47,9 +53,14 @@ def chat_completions(request: ChatCompletionRequest):
         )
 
     else:
+
         prompt = user_message
 
-    answer = ollama_service.generate(prompt)
+    print("\n========== FINAL PROMPT ==========\n")
+    print(prompt)
+    print("\n==================================\n")
+
+    answer = langchain_service.generate(prompt)
 
     return {
         "id": "chatcmpl-clingraph",
@@ -67,6 +78,7 @@ def chat_completions(request: ChatCompletionRequest):
             }
         ]
     }
+
 
 @router.get("/models")
 def list_models():
