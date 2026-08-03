@@ -1,5 +1,7 @@
 from fastapi import APIRouter
 from app.database.neo4j import neo4j_connection
+from app.services.graph_service import graph_service
+
 
 router = APIRouter(
     prefix="/graph",
@@ -182,4 +184,9 @@ def graph_stats():
     """
 
     return neo4j_connection.execute_query(query)
+
+@router.get("/context/{disease}")
+def disease_context(disease: str):
+
+    return graph_service.get_disease_context(disease)
 
