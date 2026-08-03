@@ -1,10 +1,18 @@
-from dotenv import load_dotenv
-import os
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
-load_dotenv()
 
-NEO4J_URI = os.getenv("NEO4J_URI")
-NEO4J_USERNAME = os.getenv("NEO4J_USERNAME")
-NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD")
+class Settings(BaseSettings):
+    APP_NAME: str = "ClinGraph API"
+    APP_VERSION: str = "0.1.0"
 
-OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL")
+    NEO4J_URI: str
+    NEO4J_USERNAME: str
+    NEO4J_PASSWORD: str
+
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        extra="ignore"
+    )
+
+
+settings = Settings()
