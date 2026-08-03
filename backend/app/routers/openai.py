@@ -3,6 +3,8 @@ from pydantic import BaseModel
 from typing import List
 
 from app.services.ollama_service import ollama_service
+from app.services.graph_service import graph_service
+from app.services.prompt_builder import build_prompt
 
 router = APIRouter(
     prefix="/v1",
@@ -30,7 +32,24 @@ def chat_completions(request: ChatCompletionRequest):
             user_message = message.content
             break
 
-    answer = ollama_service.generate(user_message)
+    disease = None
+
+    if "alzheimer" in user_message.lower():
+        disease = "Alzheimer's disease"
+
+    if disease:
+
+        graph_data = graph_service.get_disease_context(disease)
+
+        prompt = build_prompt(
+            user_question=user_message,
+            graph_context=graph_data
+        )
+
+    else:
+        prompt = user_message
+
+    answer = ollama_service.generate(prompt)
 
     return {
         "id": "chatcmpl-clingraph",
