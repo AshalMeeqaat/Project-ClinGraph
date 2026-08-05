@@ -2,9 +2,12 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 from typing import List
 
-from app.services.ollama_service import ollama_service
+from app.services.langchain_service import langchain_service
 from app.services.graph_service import graph_service
 from app.services.prompt_builder import build_prompt
+from app.services.entity_detector import entity_detector
+from app.services.intent_detector import intent_detector
+from app.services.intent_mapper import get_intent_mapping
 
 router = APIRouter(
     prefix="/v1",
@@ -25,6 +28,7 @@ class ChatCompletionRequest(BaseModel):
 @router.post("/chat/completions")
 def chat_completions(request: ChatCompletionRequest):
 
+    # Get the latest user message
     user_message = ""
 
     for message in reversed(request.messages):
@@ -32,14 +36,37 @@ def chat_completions(request: ChatCompletionRequest):
             user_message = message.content
             break
 
-    disease = None
 
-    if "alzheimer" in user_message.lower():
-        disease = "Alzheimer's disease"
+    disease = entity_detector.detect(user_message)
+    # Later we'll replace this with automatic detection
+    intent = intent_detector.detect(user_message)
 
-    if disease:
+    intent_mapping = get_intent_mapping()
+    
+    print("\n========== ENTITY ==========")
+    print(disease)
 
-        graph_data = graph_service.get_disease_context(disease)
+    print("\n========== INTENT ==========")
+    print(intent)
+
+    print("\n========== INTENT MAP ==========")
+    print(intent_mapping)
+
+
+    if disease and intent in intent_mapping:
+
+        relationship, target_label = intent_mapping[intent]
+        print("\n========== RELATIONSHIP ==========")
+        print(relationship)
+
+        print("\n========== TARGET LABEL ==========")
+        print(target_label)
+
+        graph_data = graph_service.get_relationship_context(
+            disease_name=disease,
+            relationship=relationship,
+            target_label=target_label
+        )
 
         prompt = build_prompt(
             user_question=user_message,
@@ -47,9 +74,16 @@ def chat_completions(request: ChatCompletionRequest):
         )
 
     else:
-        prompt = user_message
 
-    answer = ollama_service.generate(prompt)
+        prompt = user_message
+        
+    
+
+    print("\n========== FINAL PROMPT ==========\n")
+    print(prompt)
+    print("\n==================================\n")
+
+    answer = langchain_service.generate(prompt)
 
     return {
         "id": "chatcmpl-clingraph",
@@ -68,6 +102,7 @@ def chat_completions(request: ChatCompletionRequest):
         ]
     }
 
+
 @router.get("/models")
 def list_models():
     return {
@@ -79,4 +114,12 @@ def list_models():
                 "owned_by": "ClinGraph"
             }
         ]
+    }
+    
+@router.get("/intent-test")
+def intent_test(question: str):
+
+    return {
+        "question": question,
+        "intent": intent_detector.detect(question)
     }

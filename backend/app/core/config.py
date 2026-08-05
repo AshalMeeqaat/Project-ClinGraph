@@ -9,6 +9,10 @@ class Settings(BaseSettings):
     NEO4J_USERNAME: str
     NEO4J_PASSWORD: str
 
+    # Groq
+    GROQ_API_KEY: str
+    MODEL_NAME: str = "llama-3.3-70b-versatile"
+
     model_config = SettingsConfigDict(
         env_file=".env",
         extra="ignore"

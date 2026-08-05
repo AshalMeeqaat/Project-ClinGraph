@@ -33,17 +33,8 @@ class SchemaLoader:
         else:
             raise Exception(f"Unsupported dataset: {dataset}")
 
-        return self.schema
+        print(f"\nLoaded schema: {dataset}")
 
-
-class SchemaLoader:
-
-    def __init__(self):
-        self.schema = None
-
-    def load(self):
-        ...
-        self.schema = hetionet
         return self.schema
 
     def get_schema(self):

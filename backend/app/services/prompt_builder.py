@@ -1,3 +1,6 @@
+from app.services.prompt_template import graph_prompt
+
+
 def build_prompt(user_question: str, graph_context: list) -> str:
 
     if not graph_context:
@@ -5,48 +8,23 @@ def build_prompt(user_question: str, graph_context: list) -> str:
 
     disease = graph_context[0]["disease"]
 
-    drugs = "\n".join(
-        f"- {drug}" for drug in graph_context[0]["drugs"]
+    relationship = graph_context[0]["relationship"]
+
+    results = "\n".join(
+        f"- {item}"
+        for item in graph_context[0]["results"]
+        if item
     )
 
-    symptoms = "\n".join(
-        f"- {symptom}" for symptom in graph_context[0]["symptoms"]
+    prompt = graph_prompt.format(
+        disease=disease,
+        relationship=relationship,
+        results=results,
+        question=user_question
     )
 
-    prompt = f"""
-You are ClinGraph, an AI medical assistant.
-
-Your PRIMARY source of truth is the Neo4j knowledge graph below.
-
-If the requested information exists in the graph, answer using ONLY the graph.
-
-If the graph does not contain enough information, clearly state:
-"The knowledge graph does not contain this information."
-
-Only then may you supplement the answer with your general medical knowledge.
-
-==============================
-Knowledge Graph
-==============================
-
-Disease:
-{disease}
-
-Known Treatments:
-{drugs}
-
-Known Symptoms:
-{symptoms}
-
-==============================
-User Question
-==============================
-
-{user_question}
-
-Provide a clear and structured answer.
-"""
-
+    print("\n========== FINAL PROMPT ==========\n")
     print(prompt)
+    print("\n==================================\n")
 
     return prompt

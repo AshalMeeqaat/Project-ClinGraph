@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
 
-from app.services.ollama_service import ollama_service
+from app.services.langchain_service import langchain_service
 from app.services.graph_service import graph_service
 from app.services.prompt_builder import build_prompt
 
@@ -37,7 +37,7 @@ def chat(request: ChatRequest):
 
         prompt = message
 
-    answer = ollama_service.generate(prompt)
+    answer = langchain_service.generate(prompt)
 
     return {
         "answer": answer
