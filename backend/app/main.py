@@ -8,6 +8,7 @@ from app.routers.chat import router as chat_router
 from app.routers.openai import router as openai_router
 from app.services.schema_loader import schema_loader
 from app.routers.groq_test import router as groq_router
+from app.routers.neo4j_tool import router as neo4j_tool_router
 
 app = FastAPI(
     title=settings.APP_NAME,
@@ -24,3 +25,4 @@ app.include_router(graph_router)
 app.include_router(chat_router)
 app.include_router(openai_router)
 app.include_router(groq_router)
+app.include_router(neo4j_tool_router)
