@@ -9,7 +9,7 @@ from app.services.entity_detector import entity_detector
 from app.services.intent_detector import intent_detector
 from app.services.intent_mapper import get_intent_mapping
 from app.services.similar_query_service import similar_query_service
-
+from app.services.tool_service import fetchSimilarQueries, neo4jQuery
 
 router = APIRouter(
     prefix="/v1",
@@ -137,4 +137,14 @@ def similar_query_test(question: str):
     return {
         "question": question,
         "results": results
+    }
+    
+@router.get("/tool-test")
+def tool_test(question: str):
+
+    answer = langchain_service.generate(question)
+
+    return {
+        "question": question,
+        "answer": answer
     }
