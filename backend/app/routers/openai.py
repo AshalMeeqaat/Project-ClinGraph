@@ -8,6 +8,8 @@ from app.services.prompt_builder import build_prompt
 from app.services.entity_detector import entity_detector
 from app.services.intent_detector import intent_detector
 from app.services.intent_mapper import get_intent_mapping
+from app.services.similar_query_service import similar_query_service
+
 
 router = APIRouter(
     prefix="/v1",
@@ -122,4 +124,17 @@ def intent_test(question: str):
     return {
         "question": question,
         "intent": intent_detector.detect(question)
+    }
+    
+@router.get("/similar-query-test")
+def similar_query_test(question: str):
+
+    results = similar_query_service.fetch_similar_queries(
+        question,
+        k=3
+    )
+
+    return {
+        "question": question,
+        "results": results
     }
