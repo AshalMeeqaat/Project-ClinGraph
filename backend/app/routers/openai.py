@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import List
 
@@ -25,23 +25,37 @@ class ChatCompletionRequest(BaseModel):
 @router.post("/chat/completions")
 def chat_completions(request: ChatCompletionRequest):
 
-    # Get latest user message
+    # Get the latest user message
     user_message = ""
 
     for message in reversed(request.messages):
-
         if message.role == "user":
             user_message = message.content
             break
 
     if not user_message:
+        raise HTTPException(
+            status_code=400,
+            detail="No user message was provided."
+        )
 
-        return {
-            "error": "No user message provided"
-        }
+    print("\n========== USER QUESTION ==========")
+    print(user_message)
 
-    # New tool-based RAG pipeline
-    answer = langchain_service.generate(user_message)
+    try:
+        answer = langchain_service.generate(user_message)
+
+    except Exception as exc:
+        print("\n========== LLM ERROR ==========")
+        print(exc)
+
+        raise HTTPException(
+            status_code=503,
+            detail="ClinGraph is temporarily unavailable. Please try again later."
+        )
+
+    print("\n========== FINAL ANSWER ==========")
+    print(answer)
 
     return {
         "id": "chatcmpl-clingraph",
@@ -79,6 +93,12 @@ def list_models():
 @router.get("/similar-query-test")
 def similar_query_test(question: str):
 
+    if not question.strip():
+        raise HTTPException(
+            status_code=400,
+            detail="Question cannot be empty."
+        )
+
     results = similar_query_service.fetch_similar_queries(
         question,
         k=3
@@ -93,7 +113,23 @@ def similar_query_test(question: str):
 @router.get("/tool-test")
 def tool_test(question: str):
 
-    answer = langchain_service.generate(question)
+    if not question.strip():
+        raise HTTPException(
+            status_code=400,
+            detail="Question cannot be empty."
+        )
+
+    try:
+        answer = langchain_service.generate(question)
+
+    except Exception as exc:
+        print("\n========== TOOL ERROR ==========")
+        print(exc)
+
+        raise HTTPException(
+            status_code=503,
+            detail="ClinGraph is temporarily unavailable. Please try again later."
+        )
 
     return {
         "question": question,
